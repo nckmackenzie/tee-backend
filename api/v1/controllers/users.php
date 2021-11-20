@@ -115,7 +115,12 @@ if (array_key_exists('id',$_GET)) { //users/1 GET PATCH DELETE
     }
     //DELETE
     if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
-        
+        $response = $users->deleteUser($id);
+        if (!$response) {
+            sendHttpResponse(404,false,'No user to delete');
+            exit;
+        }
+        sendHttpResponse(200,true,'User deleted');
         exit;
     }
     //IF NEITHER
@@ -125,7 +130,35 @@ if (array_key_exists('id',$_GET)) { //users/1 GET PATCH DELETE
     }
     
 }elseif (array_key_exists('cid',$_GET)) { // users/center/1  GET ONLY
-    
+    $cid = trim($_GET['cid']);
+    if (!isset($cid) || empty($cid) || !is_numeric($cid)) {
+        sendHttpResponse(400,false,'Invalid ID provided');
+        exit;
+    }
+
+    $allCenterUsers = $users->getAllUsersByCenter($cid);
+    if (!$allCenterUsers) {
+        sendHttpResponse(404,false,'No records found');
+        exit;
+    }
+
+    $usersArr = array();
+    while($row = $allCenterUsers->fetch(PDO::FETCH_ASSOC)){
+        $user['id'] = (int)$row['ID'];
+        $user['userId'] = $row['UserID'];
+        $user['userName'] = $row['UserName'];
+        $user['userType'] = $row['UserType'];
+        $user['active'] = (int)$row['Active'] === 1 ? true : false;
+  
+        $usersArr[] = $user;
+    }
+
+    $totalCount = count($usersArr);
+    $returnData['rows_returned'] = $totalCount;
+    $returnData['users'] = $usersArr;
+    sendHttpResponse(200,true,$totalCount .' User(s) found',$returnData);
+    exit;
+
 }elseif (empty($_GET)) { // /users    --GET AND POST
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors =array();
@@ -209,7 +242,29 @@ if (array_key_exists('id',$_GET)) { //users/1 GET PATCH DELETE
     }
     //GET ALL USERS
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-        
+        $allUsers = $users->getAllUsers();
+        if (!$allUsers) {
+            sendHttpResponse(404,false,'No records found');
+            exit;
+        }
+        $usersArr = array();
+        while($row = $allUsers->fetch(PDO::FETCH_ASSOC)){
+            $user['id'] = (int)$row['ID'];
+            $user['userId'] = $row['UserID'];
+            $user['userName'] = $row['UserName'];
+            $user['userTypeId'] = (int)$row['UserTypeId'];
+            $user['userType'] = $row['UserType'];
+            $user['active'] = (int)$row['Active'] === 1 ? true : false;
+            $user['centerId'] = (int)$row['CenterId'];
+            $user['centerName'] = $row['CenterName'];
+
+            $usersArr[] = $user;
+        }
+
+        $totalCount = count($usersArr);
+        $returnData['rows_returned'] = $totalCount;
+        $returnData['users'] = $usersArr;
+        sendHttpResponse(200,true,$totalCount .' User(s) found',$returnData);
         exit;
     }
 }else { // no route

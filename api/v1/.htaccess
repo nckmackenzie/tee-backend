@@ -8,6 +8,7 @@ RewriteRule ^centers/([0-9]+)$ controllers/centers.php?id=$1 [L]
 RewriteRule ^centers$ controllers/centers.php [L]
 
 RewriteRule ^users/([0-9]+)$ controllers/users.php?id=$1 [L]
+RewriteRule ^users/center/([0-9]+)$ controllers/users.php?cid=$1 [L]
 RewriteRule ^users$ controllers/users.php [L]
 
 RewriteRule .* - [E=HTTP_CONTENT_TYPE:%{HTTP:Content-Type},L] #supply content type header

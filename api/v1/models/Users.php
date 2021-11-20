@@ -96,4 +96,52 @@ class Users
             return $this->getUser($data['id']);
         }
     }
+    public function deleteUser($id)
+    {
+        $this->db->query('UPDATE users SET Deleted = 1 WHERE ID = :id');
+        $this->db->bind(':id',$id);
+        if ($this->db->execute()) {
+            return true;
+        }else{
+            return false;
+        }
+    }
+    public function getAllUsers()
+    {
+        $this->db->query('SELECT u.ID,
+                                 lcase(UserID) As UserID,
+                                 ucase(UserName) As UserName,
+                                 UserTypeId,
+                                 ucase(t.UserType) As UserType,
+                                 Active,
+                                 CenterId,
+                                 ucase(c.CenterName) As CenterName
+                          FROM   users u inner join usertypes t on u.UserTypeId = t.ID
+                                 inner join centers c on u.CenterId = c.ID
+                          WHERE  (u.Deleted = 0)');
+        
+        $this->db->execute();
+        if ($this->db->rowCount() === 0) {
+            return false;
+        }else{
+            return $this->db->stmt;
+        }
+    }
+    public function getAllUsersByCenter($cid)
+    {
+        $this->db->query('SELECT u.ID,
+                                 lcase(UserID) As UserID,
+                                 ucase(UserName) As UserName,
+                                 ucase(t.UserType) As UserType,
+                                 Active
+                          FROM   users u inner join usertypes t on u.UserTypeId = t.ID
+                          WHERE  (u.Deleted = 0) AND (CenterId = :cid)');
+        $this->db->bind(':cid',$cid);
+        $this->db->execute();
+        if ($this->db->rowCount() === 0) {
+            return false;
+        }else{
+            return $this->db->stmt;
+        }
+    }
 }
