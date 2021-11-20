@@ -227,7 +227,7 @@ if (array_key_exists('id',$_GET)) { //users/1 GET PATCH DELETE
                 exit;
             }
 
-            $userData['id'] = $response;
+            $userData['id'] = (int)$response;
             $userArr[] = $userData;
             $returnData['rows_returned'] = 1;
             $returnData['user'] = $userArr;
